@@ -136,10 +136,10 @@ const { activate, deactivate } = defineExtension(() => {
     },
     'vscode-log-watcher.setLogLevelFilter': async () => {
       const options: Array<{ label: string; description: string; value: LogLevelFilter }> = [
-        { label: '全部', description: '不过滤日志等级', value: 'all' },
-        { label: 'Error', description: '仅显示 error', value: 'error' },
-        { label: 'Warning', description: '仅显示 warning', value: 'warning' },
-        { label: 'Info', description: '仅显示 info', value: 'info' },
+        { label: '全部', description: '显示全部日志等级', value: 'all' },
+        { label: 'Info 及以上', description: '显示 info / warning / error', value: 'info' },
+        { label: 'Warning 及以上', description: '显示 warning / error', value: 'warning' },
+        { label: '仅 Error', description: '只显示 error', value: 'error' },
       ]
       const pick = await window.showQuickPick(options, {
         title: '选择日志等级过滤',

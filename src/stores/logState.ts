@@ -23,17 +23,31 @@ export interface LogTreeNode extends TreeViewNode {
 }
 
 const levelIcons: Record<LogLevel, ThemeIcon> = {
-    error: new ThemeIcon('error', new ThemeColor('charts.red')),
-    warning: new ThemeIcon('warning', new ThemeColor('charts.yellow')),
-    info: new ThemeIcon('info', new ThemeColor('charts.blue')),
-    other: new ThemeIcon('circle-outline'),
-  }
+  error: new ThemeIcon('error', new ThemeColor('charts.red')),
+  warning: new ThemeIcon('warning', new ThemeColor('charts.yellow')),
+  info: new ThemeIcon('info', new ThemeColor('charts.blue')),
+  other: new ThemeIcon('circle-outline'),
+}
 
 const levelLabels: Record<LogLevelFilter, string> = {
   all: '全部',
-  error: 'Error',
-  warning: 'Warning',
-  info: 'Info',
+  info: 'Info 及以上',
+  warning: 'Warning 及以上',
+  error: '仅 Error',
+}
+
+const levelPriority: Record<LogLevel, number> = {
+  other: 0,
+  info: 1,
+  warning: 2,
+  error: 3,
+}
+
+const levelThreshold: Record<LogLevelFilter, number> = {
+  all: Number.NEGATIVE_INFINITY,
+  info: levelPriority.info,
+  warning: levelPriority.warning,
+  error: levelPriority.error,
 }
 
 function detectLevel(text: string): LogLevel {
@@ -223,11 +237,14 @@ export const useLogState = createSingletonComposable(() => {
   const filteredEntries = computed(() => {
     const tokens = keywordTokens.value
     const level = levelFilter.value
-    if (!tokens.length && level === 'all')
+    const threshold = levelThreshold[level]
+
+    if (!tokens.length && threshold === Number.NEGATIVE_INFINITY)
       return entries.value
 
     return entries.value.filter((entry) => {
-      if (level !== 'all' && entry.level !== level)
+      const priority = levelPriority[entry.level] ?? Number.NEGATIVE_INFINITY
+      if (priority < threshold)
         return false
       if (!tokens.length)
         return true
