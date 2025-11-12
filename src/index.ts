@@ -1,4 +1,5 @@
-import { defineExtension, useCommands, useTreeView } from 'reactive-vscode'
+import { effect } from '@reactive-vscode/reactivity'
+import { defineExtension, tryOnScopeDispose, useCommands, useTreeView } from 'reactive-vscode'
 import type { QuickPickItem } from 'vscode'
 import { Uri, window, workspace } from 'vscode'
 import { useLogState, type LogEntry, type LogLevelFilter, type LogTreeNode } from './stores/logState'
@@ -103,6 +104,14 @@ const { activate, deactivate } = defineExtension(() => {
   const state = useLogState()
   const treeView = useTreeView<LogTreeNode>(VIEW_ID, state.treeData, {
     showCollapseAll: false,
+  })
+
+  const messageEffect = effect(() => {
+    treeView.message = state.controlMessage.value
+  })
+
+  tryOnScopeDispose(() => {
+    messageEffect.effect.stop()
   })
 
   useCommands({

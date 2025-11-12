@@ -186,62 +186,26 @@ export const useLogState = createSingletonComposable(() => {
     })
   })
 
-  const treeData = computed<LogTreeNode[]>(() => {
-    const data: LogTreeNode[] = []
+  const controlMessage = computed(() => {
+    const parts: string[] = []
     const fileLabel = selectedFile.value
       ? workspace.asRelativePath(selectedFile.value, false)
       : '未选择日志文件'
 
-    const infoItem = new TreeItem(fileLabel, TreeItemCollapsibleState.None)
-    infoItem.description = '当前文件'
-    infoItem.tooltip = selectedFile.value?.fsPath
-    data.push({
-      kind: 'control',
-      treeItem: infoItem,
-    })
-
-    const selectItem = new TreeItem('选择/切换日志文件…', TreeItemCollapsibleState.None)
-    selectItem.iconPath = new ThemeIcon('folder-opened')
-    selectItem.command = {
-      title: '选择日志文件',
-      command: 'vscode-log-watcher.selectLogFile',
-    }
-    data.push({
-      kind: 'control',
-      treeItem: selectItem,
-    })
-
-    const levelItem = new TreeItem(`日志等级: ${levelLabels[levelFilter.value]}`, TreeItemCollapsibleState.None)
-    levelItem.command = {
-      title: '设置日志等级过滤',
-      command: 'vscode-log-watcher.setLogLevelFilter',
-    }
-    data.push({
-      kind: 'control',
-      treeItem: levelItem,
-    })
+    parts.push(`当前文件：${fileLabel}`)
+    parts.push(`[日志等级: ${levelLabels[levelFilter.value]}]`)
 
     const keywordText = keywordFilter.value ? keywordFilter.value : '（无）'
-    const keywordItem = new TreeItem(`关键字过滤: ${keywordText}`, TreeItemCollapsibleState.None)
-    keywordItem.command = {
-      title: '设置关键字过滤',
-      command: 'vscode-log-watcher.setKeywordFilter',
-    }
-    data.push({
-      kind: 'control',
-      treeItem: keywordItem,
-    })
+    parts.push(`[关键字过滤: ${keywordText}]`)
 
     const highlightText = highlightKeyword.value ? highlightKeyword.value : '（无）'
-    const highlightItem = new TreeItem(`关键字高亮: ${highlightText}`, TreeItemCollapsibleState.None)
-    highlightItem.command = {
-      title: '设置关键字高亮',
-      command: 'vscode-log-watcher.setHighlightKeyword',
-    }
-    data.push({
-      kind: 'control',
-      treeItem: highlightItem,
-    })
+    parts.push(`[关键字高亮: ${highlightText}]`)
+
+    return parts.join('  |  ')
+  })
+
+  const treeData = computed<LogTreeNode[]>(() => {
+    const data: LogTreeNode[] = []
 
     if (!filteredEntries.value.length) {
       const emptyItem = new TreeItem(selectedFile.value ? '暂无匹配的日志行' : '请选择日志文件', TreeItemCollapsibleState.None)
@@ -288,6 +252,7 @@ export const useLogState = createSingletonComposable(() => {
     treeData,
     watchFile,
     clearFile,
+      controlMessage,
     setLevelFilter(value: LogLevelFilter) {
       levelFilter.value = value
     },

@@ -98,7 +98,7 @@ export class LogWatcher implements Disposable {
   private async emitInitialLines() {
     if (!this.handle)
       return
-    const initialLines = await readTailLines(this.handle, 10)
+    const initialLines = await readTailLines(this.handle, 50)
     const stat = await this.handle.stat()
     this.offset = stat.size
     this.remainder = ''
