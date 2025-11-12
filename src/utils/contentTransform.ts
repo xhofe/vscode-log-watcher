@@ -1,3 +1,5 @@
+import preset from "./preset"
+
 export type ContentTransformFn = (line: string) => unknown
 
 export interface CompiledContentTransform {
@@ -24,6 +26,9 @@ export function compileContentTransform(input: string): CompiledContentTransform
   if (!trimmed)
     return { source: '' }
 
+  if (preset[trimmed]) {
+    return { source: trimmed, fn: preset[trimmed] }
+  }
   try {
     const fn = compileAsExpression(trimmed)
     return { source: trimmed, fn }

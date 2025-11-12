@@ -17,22 +17,27 @@
 
 | Command                                  | Title                                 |
 | ---------------------------------------- | ------------------------------------- |
-| `vscode-log-watcher.selectLogFile`       | Log Watcher: Log Watcher: 选择/切换日志文件   |
-| `vscode-log-watcher.setLogLevelFilter`   | Log Watcher: Log Watcher: 设置日志等级过滤    |
-| `vscode-log-watcher.setKeywordFilter`    | Log Watcher: Log Watcher: 设置关键字过滤     |
-| `vscode-log-watcher.setHighlightKeyword` | Log Watcher: Log Watcher: 设置关键字高亮     |
-| `vscode-log-watcher.pause`               | Log Watcher: Log Watcher: 暂停监听        |
-| `vscode-log-watcher.resume`              | Log Watcher: Log Watcher: 恢复监听        |
-| `vscode-log-watcher.formatJsonLine`      | Log Watcher: Log Watcher: JSON 格式化选中行 |
+| `vscode-log-watcher.selectLogFile`       | Log Watcher: 选择/切换日志文件   |
+| `vscode-log-watcher.setLogLevelFilter`   | Log Watcher: 设置日志等级过滤    |
+| `vscode-log-watcher.setKeywordFilter`    | Log Watcher: 设置关键字过滤     |
+| `vscode-log-watcher.setHighlightKeyword` | Log Watcher: 设置关键字高亮     |
+| `vscode-log-watcher.pause`               | Log Watcher: 暂停监听          |
+| `vscode-log-watcher.resume`              | Log Watcher: 恢复监听          |
+| `vscode-log-watcher.formatJsonLine`      | Log Watcher: JSON 格式化选中行  |
 
 <!-- commands -->
 
-## FLS
+## Presets
 
+- fls
 ```js
-(text) => { const obj = JSON.parse(text);const time = new Date(obj._datetime_).toLocaleString();return time + ' ' + obj._level_.toUpperCase()  + ' ' + obj._msg_}
+(text: string) => {
+    const obj = JSON.parse(text)
+    const time = new Date(obj._datetime_).toLocaleString()
+    return time + ' ' + obj._level_.toUpperCase() + ' ' + obj._msg_
+}
 ```
 
 ## License
 
-[MIT](./LICENSE.md) License © 2022 [Andy Hsu](https://github.com/xhofe)
+[MIT](./LICENSE.md) License © 2025 [Andy Hsu](https://github.com/xhofe)
