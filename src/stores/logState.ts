@@ -248,8 +248,7 @@ export const useLogState = createSingletonComposable(() => {
         return false
       if (!tokens.length)
         return true
-      const transformed = applyContentTransform(entry.text, contentTransform.value)
-      const lower = transformed.toLowerCase()
+      const lower = entry.text.toLowerCase()
       return tokens.every(token => lower.includes(token))
     })
   })

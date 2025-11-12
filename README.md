@@ -27,6 +27,12 @@
 
 <!-- commands -->
 
+## FLS
+
+```js
+(text) => { const obj = JSON.parse(text);const time = new Date(obj._datetime_).toLocaleString();return time + ' ' + obj._level_.toUpperCase()  + ' ' + obj._msg_}
+```
+
 ## License
 
 [MIT](./LICENSE.md) License © 2022 [Andy Hsu](https://github.com/xhofe)
