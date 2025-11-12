@@ -182,6 +182,10 @@ const { activate, deactivate } = defineExtension(() => {
       state.resume()
       logger.info('日志监听已恢复')
     },
+    'vscode-log-watcher.clearEntries': async () => {
+      state.clearEntries()
+      logger.info('已清空日志列表')
+    },
     'vscode-log-watcher.formatJsonLine': async (target) => {
       const entry = isLogTreeNode(target) ? target.entry : target
       if (!entry) {

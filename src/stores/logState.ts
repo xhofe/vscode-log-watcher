@@ -212,6 +212,11 @@ export const useLogState = createSingletonComposable(() => {
     pendingLines.value = []
   }
 
+  function clearEntriesState() {
+    entries.value = []
+    entryCounter = 0
+  }
+
   const keywordTokens = computed(() => parseKeywords(keywordFilter.value))
   const highlightTokens = computed(() => parseKeywords(highlightKeyword.value))
 
@@ -260,20 +265,31 @@ export const useLogState = createSingletonComposable(() => {
   const treeData = computed<LogTreeNode[]>(() => {
     const data: LogTreeNode[] = []
 
-    if (selectedFile.value) {
-      const statusItem = new TreeItem(isPaused.value ? '恢复监听' : '暂停监听', TreeItemCollapsibleState.None)
-      statusItem.command = {
-        title: isPaused.value ? '恢复监听' : '暂停监听',
-        command: isPaused.value ? 'vscode-log-watcher.resume' : 'vscode-log-watcher.pause',
-      }
-      statusItem.iconPath = new ThemeIcon(isPaused.value ? 'debug-start' : 'debug-pause')
-      if (pendingLines.value.length)
-        statusItem.description = `待处理 ${pendingLines.value.length} 行`
-      data.push({
-        kind: 'control',
-        treeItem: statusItem,
-      })
-    }
+    // if (selectedFile.value) {
+    //   const statusItem = new TreeItem(isPaused.value ? '恢复监听' : '暂停监听', TreeItemCollapsibleState.None)
+    //   statusItem.command = {
+    //     title: isPaused.value ? '恢复监听' : '暂停监听',
+    //     command: isPaused.value ? 'vscode-log-watcher.resume' : 'vscode-log-watcher.pause',
+    //   }
+    //   statusItem.iconPath = new ThemeIcon(isPaused.value ? 'debug-start' : 'debug-pause')
+    //   if (pendingLines.value.length)
+    //     statusItem.description = `待处理 ${pendingLines.value.length} 行`
+    //   data.push({
+    //     kind: 'control',
+    //     treeItem: statusItem,
+    //   })
+
+    //   const clearItem = new TreeItem('清空日志列表', TreeItemCollapsibleState.None)
+    //   clearItem.command = {
+    //     title: '清空日志列表',
+    //     command: 'vscode-log-watcher.clearEntries',
+    //   }
+    //   clearItem.iconPath = new ThemeIcon('trash')
+    //   data.push({
+    //     kind: 'control',
+    //     treeItem: clearItem,
+    //   })
+    // }
 
     if (!filteredEntries.value.length) {
       const emptyItem = new TreeItem(selectedFile.value ? '暂无匹配的日志行' : '请选择日志文件', TreeItemCollapsibleState.None)
@@ -325,6 +341,7 @@ export const useLogState = createSingletonComposable(() => {
     selectedFileLabel,
     watchFile,
     clearFile,
+    clearEntries: clearEntriesState,
     pause() {
       if (!isPaused.value)
         isPaused.value = true
