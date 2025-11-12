@@ -37,7 +37,81 @@
     "onStartupFinished"
   ],
   "contributes": {
-    "commands": [],
+    "commands": [
+      {
+        "command": "vscode-log-watcher.selectLogFile",
+        "title": "Log Watcher: 选择/切换日志文件",
+        "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.setLogLevelFilter",
+        "title": "Log Watcher: 设置日志等级过滤",
+        "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.setKeywordFilter",
+        "title": "Log Watcher: 设置关键字过滤",
+        "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.setHighlightKeyword",
+        "title": "Log Watcher: 设置关键字高亮",
+        "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.formatJsonLine",
+        "title": "Log Watcher: JSON 格式化选中行",
+        "category": "Log Watcher"
+      }
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "vscode-log-watcher",
+          "title": "Log Watcher",
+          "icon": "res/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "vscode-log-watcher": [
+        {
+          "id": "vscode-log-watcher.logPanel",
+          "name": "Log Watcher"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "vscode-log-watcher.selectLogFile",
+          "when": "view == vscode-log-watcher.logPanel",
+          "group": "navigation@0"
+        },
+        {
+          "command": "vscode-log-watcher.setLogLevelFilter",
+          "when": "view == vscode-log-watcher.logPanel",
+          "group": "navigation@10"
+        },
+        {
+          "command": "vscode-log-watcher.setKeywordFilter",
+          "when": "view == vscode-log-watcher.logPanel",
+          "group": "navigation@20"
+        },
+        {
+          "command": "vscode-log-watcher.setHighlightKeyword",
+          "when": "view == vscode-log-watcher.logPanel",
+          "group": "navigation@30"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "vscode-log-watcher.formatJsonLine",
+          "when": "view == vscode-log-watcher.logPanel && viewItem == logLine",
+          "group": "inline"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "vscode-log-watcher",
