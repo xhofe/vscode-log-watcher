@@ -1,13 +1,15 @@
 import { effect } from '@reactive-vscode/reactivity'
 import { defineExtension, tryOnScopeDispose, useCommands, useTreeView } from 'reactive-vscode'
 import type { QuickPickItem } from 'vscode'
-import { Uri, window, workspace } from 'vscode'
+import { Uri, languages, window, workspace } from 'vscode'
 import { useLogState, type LogEntry, type LogLevelFilter, type LogTreeNode } from './stores/logState'
+import { JsonPreviewProvider, JSON_PREVIEW_SCHEME } from './providers/jsonPreview'
 import { logger } from './utils'
 
 const VIEW_ID = 'vscode-log-watcher.logPanel'
 const LOG_FILE_GLOB = '**/*.{log,txt,json,jsonl,ndjson,fls}'
 const LOG_FILE_EXCLUDES = '**/{.git,node_modules,vendor,dist,out,build,tmp,temp}/**'
+const JSON_PREVIEW_URI = Uri.from({ scheme: JSON_PREVIEW_SCHEME, path: '/formatted.json' })
 
 interface LogQuickPickItem extends QuickPickItem {
   uri: Uri
@@ -106,12 +108,20 @@ const { activate, deactivate } = defineExtension(() => {
     showCollapseAll: false,
   })
 
+  const jsonPreviewProvider = new JsonPreviewProvider()
+  const jsonPreviewDisposable = workspace.registerTextDocumentContentProvider(JSON_PREVIEW_SCHEME, jsonPreviewProvider)
+
   const messageEffect = effect(() => {
     treeView.message = state.controlMessage.value
   })
 
   tryOnScopeDispose(() => {
     messageEffect.effect.stop()
+  })
+
+  tryOnScopeDispose(() => {
+    jsonPreviewProvider.dispose()
+    jsonPreviewDisposable.dispose()
   })
 
   useCommands({
@@ -172,11 +182,10 @@ const { activate, deactivate } = defineExtension(() => {
       try {
         const parsed = JSON.parse(snippet)
         const formatted = JSON.stringify(parsed, null, 2)
-        const doc = await workspace.openTextDocument({
-          content: formatted,
-          language: 'json',
-        })
-        await window.showTextDocument(doc, { preview: false })
+        jsonPreviewProvider.update(JSON_PREVIEW_URI, formatted)
+        const doc = await workspace.openTextDocument(JSON_PREVIEW_URI)
+        const jsonDoc = await languages.setTextDocumentLanguage(doc, 'json')
+        await window.showTextDocument(jsonDoc, { preview: true })
       }
       catch (error) {
         void window.showErrorMessage(`JSON 解析失败: ${error instanceof Error ? error.message : String(error)}`)
