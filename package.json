@@ -146,6 +146,11 @@
       "type": "object",
       "title": "vscode-log-watcher",
       "properties": {
+        "vscode-log-watcher.defaultFile": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "扩展激活时自动监听的默认日志文件绝对路径。留空则不自动打开。"
+        },
         "vscode-log-watcher.contentTransform": {
           "type": "string",
           "default": "",

@@ -211,6 +211,24 @@ const { activate, deactivate } = defineExtension(() => {
     },
   })
 
+  const defaultFile = workspace.getConfiguration('vscode-log-watcher').get<string>('defaultFile', '')
+  if (defaultFile) {
+    const uri = workspace.workspaceFolders
+      ? Uri.joinPath(workspace.workspaceFolders[0].uri, defaultFile)
+      : Uri.file(defaultFile)
+    ;(async () => {
+      try {
+        await workspace.fs.stat(uri)
+        if (!state.selectedFile.value)
+          await state.watchFile(uri)
+      }
+      catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        logger.warn('默认日志文件不可用', defaultFile, message)
+      }
+    })()
+  }
+
   return {
     treeView,
   }
