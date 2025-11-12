@@ -1,7 +1,7 @@
 import type { TreeViewNode } from 'reactive-vscode'
 import { createSingletonComposable, tryOnScopeDispose } from 'reactive-vscode'
 import { computed, ref } from '@reactive-vscode/reactivity'
-import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, window, workspace } from 'vscode'
+import { ThemeColor, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, window, workspace } from 'vscode'
 import { LogWatcher, type LogUpdate } from '../services/logWatcher'
 
 const MAX_ENTRIES = 2000
@@ -22,11 +22,11 @@ export interface LogTreeNode extends TreeViewNode {
 }
 
 const levelIcons: Record<LogLevel, ThemeIcon> = {
-  error: new ThemeIcon('error'),
-  warning: new ThemeIcon('warning'),
-  info: new ThemeIcon('info'),
-  other: new ThemeIcon('circle-outline'),
-}
+    error: new ThemeIcon('error', new ThemeColor('charts.red')),
+    warning: new ThemeIcon('warning', new ThemeColor('charts.yellow')),
+    info: new ThemeIcon('info', new ThemeColor('charts.blue')),
+    other: new ThemeIcon('circle-outline'),
+  }
 
 const levelLabels: Record<LogLevelFilter, string> = {
   all: '全部',
