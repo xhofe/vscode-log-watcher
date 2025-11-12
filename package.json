@@ -135,7 +135,13 @@
     "configuration": {
       "type": "object",
       "title": "vscode-log-watcher",
-      "properties": {}
+      "properties": {
+        "vscode-log-watcher.contentTransform": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "自定义 JavaScript 代码，用于将每一行日志转换成面板展示内容。可写函数表达式（例如 `line => line.trim()`）或函数体（例如 `return line.trim()`）。当返回 `undefined` 或抛出异常时，将回退为原始日志行。"
+        }
+      }
     }
   },
   "scripts": {

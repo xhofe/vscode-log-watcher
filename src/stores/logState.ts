@@ -3,6 +3,7 @@ import { createSingletonComposable, tryOnScopeDispose } from 'reactive-vscode'
 import { computed, ref } from '@reactive-vscode/reactivity'
 import { ThemeColor, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, window, workspace } from 'vscode'
 import { LogWatcher, type LogUpdate } from '../services/logWatcher'
+import { applyContentTransform, compileContentTransform, type CompiledContentTransform } from '../utils/contentTransform'
 
 const MAX_ENTRIES = 2000
 
@@ -98,6 +99,8 @@ export const useLogState = createSingletonComposable(() => {
   const highlightKeyword = ref('')
   const isPaused = ref(false)
   const pendingLines = ref<string[]>([])
+  const contentTransform = ref<CompiledContentTransform>(compileContentTransform(''))
+  let lastTransformErrorKey: string | undefined
   const watcherRef = ref<LogWatcher>()
   let watcherSubscription: { dispose(): void } | undefined
   let entryCounter = 0
@@ -106,6 +109,33 @@ export const useLogState = createSingletonComposable(() => {
     if (!selectedFile.value)
       return '未选择日志文件'
     return workspace.asRelativePath(selectedFile.value, false)
+  })
+
+  function updateContentTransform(source: string) {
+    const compiled = compileContentTransform(source)
+    contentTransform.value = compiled
+    if (!compiled.error) {
+      lastTransformErrorKey = undefined
+      return
+    }
+
+    const key = `${compiled.source}::${compiled.error}`
+    if (lastTransformErrorKey !== key) {
+      lastTransformErrorKey = key
+      void window.showErrorMessage(`内容转换函数无效: ${compiled.error}`)
+    }
+  }
+
+  function loadContentTransform() {
+    const value = workspace.getConfiguration('vscode-log-watcher').get<string>('contentTransform', '') ?? ''
+    updateContentTransform(value)
+  }
+
+  loadContentTransform()
+
+  const configDisposable = workspace.onDidChangeConfiguration((event) => {
+    if (event.affectsConfiguration('vscode-log-watcher.contentTransform'))
+      loadContentTransform()
   })
 
   function resetEntries(lines: string[]) {
@@ -196,7 +226,8 @@ export const useLogState = createSingletonComposable(() => {
         return false
       if (!tokens.length)
         return true
-      const lower = entry.text.toLowerCase()
+      const transformed = applyContentTransform(entry.text, contentTransform.value)
+      const lower = transformed.toLowerCase()
       return tokens.every(token => lower.includes(token))
     })
   })
@@ -204,6 +235,13 @@ export const useLogState = createSingletonComposable(() => {
   const controlMessage = computed(() => {
     const keywordText = keywordFilter.value ? keywordFilter.value : '（无）'
     const highlightText = highlightKeyword.value ? highlightKeyword.value : '（无）'
+    const transformLabel = contentTransform.value.source
+      ? contentTransform.value.error
+        ? `${contentTransform.value.source.slice(0, 40)}…（无效）`
+        : contentTransform.value.source.length > 60
+          ? `${contentTransform.value.source.slice(0, 60)}…`
+          : contentTransform.value.source
+      : '（无）'
     const pendingText = pendingLines.value.length
       ? `（待处理 ${pendingLines.value.length} 行）`
       : ''
@@ -215,6 +253,7 @@ export const useLogState = createSingletonComposable(() => {
       `日志等级: ${levelLabels[levelFilter.value]}`,
       `关键字过滤: ${keywordText}`,
       `关键字高亮: ${highlightText}`,
+      `内容函数: ${transformLabel}`,
     ].join('  |  ')
   })
 
@@ -249,9 +288,10 @@ export const useLogState = createSingletonComposable(() => {
     const highlightKeywords = highlightTokens.value
 
     for (const entry of filteredEntries.value) {
+      const displayText = applyContentTransform(entry.text, contentTransform.value)
       const label = {
-        label: entry.text,
-        highlights: computeHighlights(entry.text, highlightKeywords),
+        label: displayText,
+        highlights: computeHighlights(displayText, highlightKeywords),
       }
       const item = new TreeItem(label, TreeItemCollapsibleState.None)
       item.contextValue = 'logLine'
@@ -269,6 +309,7 @@ export const useLogState = createSingletonComposable(() => {
 
   tryOnScopeDispose(() => {
     disposeWatcher()
+    configDisposable.dispose()
   })
 
   return {
