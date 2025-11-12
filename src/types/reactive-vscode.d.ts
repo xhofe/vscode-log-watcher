@@ -6,6 +6,8 @@ declare module 'reactive-vscode' {
     'vscode-log-watcher.setLogLevelFilter': () => Promise<void>
     'vscode-log-watcher.setKeywordFilter': () => Promise<void>
     'vscode-log-watcher.setHighlightKeyword': () => Promise<void>
+    'vscode-log-watcher.pause': () => Promise<void>
+    'vscode-log-watcher.resume': () => Promise<void>
     'vscode-log-watcher.formatJsonLine': (target: LogEntry | LogTreeNode) => Promise<void>
   }
 }

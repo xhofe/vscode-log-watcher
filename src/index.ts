@@ -1,5 +1,5 @@
 import { effect } from '@reactive-vscode/reactivity'
-import { defineExtension, tryOnScopeDispose, useCommands, useTreeView } from 'reactive-vscode'
+import { defineExtension, tryOnScopeDispose, useCommands, useTreeView, useVscodeContext } from 'reactive-vscode'
 import type { QuickPickItem } from 'vscode'
 import { Uri, languages, window, workspace } from 'vscode'
 import { useLogState, type LogEntry, type LogLevelFilter, type LogTreeNode } from './stores/logState'
@@ -115,6 +115,8 @@ const { activate, deactivate } = defineExtension(() => {
     treeView.message = state.controlMessage.value
   })
 
+  useVscodeContext('vscode-log-watcher.paused', state.isPaused)
+
   tryOnScopeDispose(() => {
     messageEffect.effect.stop()
   })
@@ -167,6 +169,18 @@ const { activate, deactivate } = defineExtension(() => {
       if (value === undefined)
         return
       state.setHighlightKeyword(value.trim())
+    },
+    'vscode-log-watcher.pause': async () => {
+      if (state.isPaused.value)
+        return
+      state.pause()
+      logger.warn('日志监听已暂停')
+    },
+    'vscode-log-watcher.resume': async () => {
+      if (!state.isPaused.value)
+        return
+      state.resume()
+      logger.info('日志监听已恢复')
     },
     'vscode-log-watcher.formatJsonLine': async (target) => {
       const entry = isLogTreeNode(target) ? target.entry : target

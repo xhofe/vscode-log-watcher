@@ -13,6 +13,7 @@ export type LogUpdate =
   }
 
 const TAIL_READ_SIZE = 64 * 1024
+const TAIL_READ_COUNT = 50
 
 async function readTailLines(handle: FileHandle, count: number): Promise<string[]> {
   const stat = await handle.stat()
@@ -98,7 +99,7 @@ export class LogWatcher implements Disposable {
   private async emitInitialLines() {
     if (!this.handle)
       return
-    const initialLines = await readTailLines(this.handle, 50)
+    const initialLines = await readTailLines(this.handle, TAIL_READ_COUNT)
     const stat = await this.handle.stat()
     this.offset = stat.size
     this.remainder = ''

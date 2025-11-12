@@ -96,12 +96,21 @@ export const useLogState = createSingletonComposable(() => {
   const levelFilter = ref<LogLevelFilter>('all')
   const keywordFilter = ref('')
   const highlightKeyword = ref('')
+  const isPaused = ref(false)
+  const pendingLines = ref<string[]>([])
   const watcherRef = ref<LogWatcher>()
   let watcherSubscription: { dispose(): void } | undefined
   let entryCounter = 0
 
+  const selectedFileLabel = computed(() => {
+    if (!selectedFile.value)
+      return '未选择日志文件'
+    return workspace.asRelativePath(selectedFile.value, false)
+  })
+
   function resetEntries(lines: string[]) {
     entryCounter = 0
+    pendingLines.value = []
     entries.value = lines.map((line) => {
       const entry: LogEntry = {
         id: createEntryId(entryCounter++),
@@ -139,6 +148,7 @@ export const useLogState = createSingletonComposable(() => {
     disposeWatcher()
     entryCounter = 0
     entries.value = []
+    pendingLines.value = []
     const watcher = new LogWatcher()
     watcherRef.value = watcher
     watcherSubscription = watcher.onDidUpdate((update: LogUpdate) => {
@@ -146,6 +156,10 @@ export const useLogState = createSingletonComposable(() => {
         resetEntries(update.lines)
       }
       else {
+        if (isPaused.value) {
+          pendingLines.value = [...pendingLines.value, ...update.lines].slice(-MAX_ENTRIES)
+          return
+        }
         appendEntries(update.lines)
       }
     })
@@ -165,6 +179,7 @@ export const useLogState = createSingletonComposable(() => {
     selectedFile.value = undefined
     entries.value = []
     entryCounter = 0
+    pendingLines.value = []
   }
 
   const keywordTokens = computed(() => parseKeywords(keywordFilter.value))
@@ -187,25 +202,39 @@ export const useLogState = createSingletonComposable(() => {
   })
 
   const controlMessage = computed(() => {
-    const parts: string[] = []
-    const fileLabel = selectedFile.value
-      ? workspace.asRelativePath(selectedFile.value, false)
-      : '未选择日志文件'
-
-    parts.push(`当前文件：${fileLabel}`)
-    parts.push(`[日志等级: ${levelLabels[levelFilter.value]}]`)
-
     const keywordText = keywordFilter.value ? keywordFilter.value : '（无）'
-    parts.push(`[关键字过滤: ${keywordText}]`)
-
     const highlightText = highlightKeyword.value ? highlightKeyword.value : '（无）'
-    parts.push(`[关键字高亮: ${highlightText}]`)
+    const pendingText = pendingLines.value.length
+      ? `（待处理 ${pendingLines.value.length} 行）`
+      : ''
+    const status = isPaused.value ? `已暂停${pendingText}` : '监听中'
 
-    return parts.join('  |  ')
+    return [
+      `状态: ${status}`,
+      `当前文件: ${selectedFileLabel.value}`,
+      `日志等级: ${levelLabels[levelFilter.value]}`,
+      `关键字过滤: ${keywordText}`,
+      `关键字高亮: ${highlightText}`,
+    ].join('  |  ')
   })
 
   const treeData = computed<LogTreeNode[]>(() => {
     const data: LogTreeNode[] = []
+
+    if (selectedFile.value) {
+      const statusItem = new TreeItem(isPaused.value ? '恢复监听' : '暂停监听', TreeItemCollapsibleState.None)
+      statusItem.command = {
+        title: isPaused.value ? '恢复监听' : '暂停监听',
+        command: isPaused.value ? 'vscode-log-watcher.resume' : 'vscode-log-watcher.pause',
+      }
+      statusItem.iconPath = new ThemeIcon(isPaused.value ? 'debug-start' : 'debug-pause')
+      if (pendingLines.value.length)
+        statusItem.description = `待处理 ${pendingLines.value.length} 行`
+      data.push({
+        kind: 'control',
+        treeItem: statusItem,
+      })
+    }
 
     if (!filteredEntries.value.length) {
       const emptyItem = new TreeItem(selectedFile.value ? '暂无匹配的日志行' : '请选择日志文件', TreeItemCollapsibleState.None)
@@ -248,11 +277,27 @@ export const useLogState = createSingletonComposable(() => {
     levelFilter,
     keywordFilter,
     highlightKeyword,
+    isPaused,
     filteredEntries,
     treeData,
+    controlMessage,
+    selectedFileLabel,
     watchFile,
     clearFile,
-      controlMessage,
+    pause() {
+      if (!isPaused.value)
+        isPaused.value = true
+    },
+    resume() {
+      if (!isPaused.value)
+        return
+      isPaused.value = false
+      if (pendingLines.value.length) {
+        const buffered = pendingLines.value
+        pendingLines.value = []
+        appendEntries(buffered)
+      }
+    },
     setLevelFilter(value: LogLevelFilter) {
       levelFilter.value = value
     },

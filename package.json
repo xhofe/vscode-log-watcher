@@ -59,6 +59,16 @@
         "category": "Log Watcher"
       },
       {
+        "command": "vscode-log-watcher.pause",
+        "title": "Log Watcher: 暂停监听",
+        "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.resume",
+        "title": "Log Watcher: 恢复监听",
+        "category": "Log Watcher"
+      },
+      {
         "command": "vscode-log-watcher.formatJsonLine",
         "title": "Log Watcher: JSON 格式化选中行",
         "category": "Log Watcher"
@@ -102,6 +112,16 @@
           "command": "vscode-log-watcher.setHighlightKeyword",
           "when": "view == vscode-log-watcher.logPanel",
           "group": "navigation@30"
+        },
+        {
+          "command": "vscode-log-watcher.pause",
+          "when": "view == vscode-log-watcher.logPanel && !vscode-log-watcher.paused",
+          "group": "navigation@40"
+        },
+        {
+          "command": "vscode-log-watcher.resume",
+          "when": "view == vscode-log-watcher.logPanel && vscode-log-watcher.paused",
+          "group": "navigation@40"
         }
       ],
       "view/item/context": [
