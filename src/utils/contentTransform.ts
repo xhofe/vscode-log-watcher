@@ -1,4 +1,5 @@
-import preset from "./preset"
+import { logger } from '../utils'
+import preset from './preset'
 
 export type ContentTransformFn = (line: string) => unknown
 
@@ -9,7 +10,8 @@ export interface CompiledContentTransform {
 }
 
 function compileAsExpression(trimmed: string): ContentTransformFn {
-  const factory = Function('"use strict"; return (' + trimmed + ');') as () => unknown
+  // eslint-disable-next-line no-new-func
+  const factory = new Function(`"use strict"; return (${trimmed});`) as () => unknown
   const result = factory()
   if (typeof result !== 'function')
     throw new TypeError('表达式未返回函数')
@@ -34,6 +36,7 @@ export function compileContentTransform(input: string): CompiledContentTransform
     return { source: trimmed, fn }
   }
   catch (expressionError) {
+    logger.error('compileContentTransform', expressionError)
     try {
       const fn = compileAsBody(trimmed)
       return { source: trimmed, fn }
@@ -62,4 +65,3 @@ export function applyContentTransform(line: string, compiled: CompiledContentTra
     return line
   }
 }
-

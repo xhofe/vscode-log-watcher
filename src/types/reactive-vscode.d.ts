@@ -13,4 +13,3 @@ declare module 'reactive-vscode' {
     'vscode-log-watcher.formatJsonLine': (target: LogEntry | LogTreeNode) => Promise<void>
   }
 }
-

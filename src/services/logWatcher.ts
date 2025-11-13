@@ -1,6 +1,10 @@
-import { watch, type FSWatcher } from 'node:fs'
-import { open, type FileHandle } from 'node:fs/promises'
-import { EventEmitter, Uri, type Disposable } from 'vscode'
+import type { FSWatcher } from 'node:fs'
+import type { FileHandle } from 'node:fs/promises'
+import type { Disposable, Uri } from 'vscode'
+import { Buffer } from 'node:buffer'
+import { watch } from 'node:fs'
+import { open } from 'node:fs/promises'
+import { EventEmitter } from 'vscode'
 
 export type LogUpdate =
   | {
@@ -192,4 +196,3 @@ export class LogWatcher implements Disposable {
     }
   }
 }
-

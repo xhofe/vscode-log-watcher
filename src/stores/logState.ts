@@ -1,9 +1,12 @@
 import type { TreeViewNode } from 'reactive-vscode'
-import { createSingletonComposable, tryOnScopeDispose } from 'reactive-vscode'
+import type { Uri } from 'vscode'
+import type { LogUpdate } from '../services/logWatcher'
+import type { CompiledContentTransform } from '../utils/contentTransform'
 import { computed, ref } from '@reactive-vscode/reactivity'
-import { ThemeColor, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, window, workspace } from 'vscode'
-import { LogWatcher, type LogUpdate } from '../services/logWatcher'
-import { applyContentTransform, compileContentTransform, type CompiledContentTransform } from '../utils/contentTransform'
+import { createSingletonComposable, tryOnScopeDispose } from 'reactive-vscode'
+import { ThemeColor, ThemeIcon, TreeItem, TreeItemCollapsibleState, window, workspace } from 'vscode'
+import { LogWatcher } from '../services/logWatcher'
+import { applyContentTransform, compileContentTransform } from '../utils/contentTransform'
 
 const MAX_ENTRIES = 2000
 
@@ -117,7 +120,7 @@ export const useLogState = createSingletonComposable(() => {
   const contentTransform = ref<CompiledContentTransform>(compileContentTransform(''))
   let lastTransformErrorKey: string | undefined
   const watcherRef = ref<LogWatcher>()
-  let watcherSubscription: { dispose(): void } | undefined
+  let watcherSubscription: { dispose: () => void } | undefined
   let entryCounter = 0
 
   const selectedFileLabel = computed(() => {
@@ -396,4 +399,3 @@ export const useLogState = createSingletonComposable(() => {
     },
   }
 })
-

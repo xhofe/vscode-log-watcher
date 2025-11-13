@@ -1,9 +1,10 @@
+import type { QuickPickItem } from 'vscode'
+import type { LogEntry, LogLevelFilter, LogTreeNode } from './stores/logState'
 import { effect } from '@reactive-vscode/reactivity'
 import { defineExtension, tryOnScopeDispose, useCommands, useTreeView, useVscodeContext } from 'reactive-vscode'
-import type { QuickPickItem } from 'vscode'
-import { Uri, languages, window, workspace } from 'vscode'
-import { useLogState, type LogEntry, type LogLevelFilter, type LogTreeNode } from './stores/logState'
-import { JsonPreviewProvider, JSON_PREVIEW_SCHEME } from './providers/jsonPreview'
+import { languages, Uri, window, workspace } from 'vscode'
+import { JSON_PREVIEW_SCHEME, JsonPreviewProvider } from './providers/jsonPreview'
+import { useLogState } from './stores/logState'
 import { logger } from './utils'
 
 const VIEW_ID = 'vscode-log-watcher.logPanel'
@@ -26,7 +27,7 @@ function extractJsonSnippet(text: string): string | undefined {
 
   const firstBrace = Math.min(
     ...['{', '[']
-      .map(char => {
+      .map((char) => {
         const index = trimmed.indexOf(char)
         return index === -1 ? Number.POSITIVE_INFINITY : index
       }),
@@ -62,8 +63,9 @@ function extractJsonSnippet(text: string): string | undefined {
       continue
     }
 
-    if (char === startChar)
+    if (char === startChar) {
       depth++
+    }
     else if (char === closeChar) {
       depth--
       if (depth === 0)
@@ -122,7 +124,7 @@ const { activate, deactivate } = defineExtension(() => {
   const resetEffect = effect(() => {
     const selectedFile = state.selectedFile.value
     const lastEntryId = state.lastFilteredEntryId.value
-    
+
     // 如果文件被清空或切换，重置状态
     if (!selectedFile || !lastEntryId) {
       lastRevealedEntryId = undefined
@@ -172,7 +174,7 @@ const { activate, deactivate } = defineExtension(() => {
       logger.info('已开始监听日志文件', uri.fsPath)
     },
     'vscode-log-watcher.setLogLevelFilter': async () => {
-      const options: Array<{ label: string; description: string; value: LogLevelFilter }> = [
+      const options: Array<{ label: string, description: string, value: LogLevelFilter }> = [
         { label: '全部', description: '显示全部日志等级', value: 'all' },
         { label: 'Info 及以上', description: '显示 info / warning / error', value: 'info' },
         { label: 'Warning 及以上', description: '显示 warning / error', value: 'warning' },

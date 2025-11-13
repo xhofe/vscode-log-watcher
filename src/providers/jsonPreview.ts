@@ -1,4 +1,4 @@
-import { EventEmitter, Uri, type Event, type TextDocumentContentProvider } from 'vscode'
+import type { type Event, EventEmitter, type TextDocumentContentProvider, Uri } from 'vscode'
 
 const SCHEME = 'vscode-log-watcher-json'
 
@@ -26,5 +26,3 @@ export class JsonPreviewProvider implements TextDocumentContentProvider {
     this.cache.clear()
   }
 }
-
-

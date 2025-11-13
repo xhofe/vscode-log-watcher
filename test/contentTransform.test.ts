@@ -48,4 +48,3 @@ describe('compileContentTransform', () => {
     expect(applyContentTransform('{"_level_":"info","_datetime_":"2025-11-11T13:43:27.920554+0800","_msg_":"[FRPC] success to shutdown app"}', compiled)).toBe('info 2025-11-11T13:43:27.920554+0800 [FRPC] success to shutdown app')
   })
 })
-
