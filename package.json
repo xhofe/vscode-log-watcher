@@ -70,7 +70,12 @@
       },
       {
         "command": "vscode-log-watcher.clearEntries",
-        "title": "清空日志列表",
+        "title": "清空日志",
+        "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.toggleAutoScroll",
+        "title": "自动滚动",
         "category": "Log Watcher"
       },
       {
@@ -132,6 +137,11 @@
           "command": "vscode-log-watcher.clearEntries",
           "when": "view == vscode-log-watcher.logPanel",
           "group": "navigation@50"
+        },
+        {
+          "command": "vscode-log-watcher.toggleAutoScroll",
+          "when": "view == vscode-log-watcher.logPanel",
+          "group": "navigation@60"
         }
       ],
       "view/item/context": [

@@ -115,10 +115,47 @@ const { activate, deactivate } = defineExtension(() => {
     treeView.message = state.controlMessage.value
   })
 
+  // 跟踪最后一个显示的日志条目 ID，用于判断是否需要自动滚动
+  let lastRevealedEntryId: string | undefined
+
+  // 当文件变化或日志清空时，重置状态
+  const resetEffect = effect(() => {
+    const selectedFile = state.selectedFile.value
+    const lastEntryId = state.lastFilteredEntryId.value
+    
+    // 如果文件被清空或切换，重置状态
+    if (!selectedFile || !lastEntryId) {
+      lastRevealedEntryId = undefined
+    }
+  })
+
+  // 监听日志变化，自动滚动到底部
+  const autoScrollEffect = effect(() => {
+    const lastEntryId = state.lastFilteredEntryId.value
+    if (!lastEntryId || !state.autoScroll.value)
+      return
+
+    // 如果最后一个条目发生了变化（有新日志），则滚动到该条目
+    if (lastEntryId !== lastRevealedEntryId) {
+      const treeData = state.treeData.value
+      const lastNode = treeData.find(node => node.kind === 'log' && node.entry?.id === lastEntryId)
+      if (lastNode) {
+        // 使用 setTimeout 确保 DOM 已更新
+        setTimeout(() => {
+          void treeView.reveal(lastNode, { select: false, focus: false, expand: false })
+          lastRevealedEntryId = lastEntryId
+        }, 0)
+      }
+    }
+  })
+
   useVscodeContext('vscode-log-watcher.paused', state.isPaused)
+  useVscodeContext('vscode-log-watcher.autoScroll', state.autoScroll)
 
   tryOnScopeDispose(() => {
     messageEffect.effect.stop()
+    resetEffect.effect.stop()
+    autoScrollEffect.effect.stop()
   })
 
   tryOnScopeDispose(() => {
@@ -185,6 +222,10 @@ const { activate, deactivate } = defineExtension(() => {
     'vscode-log-watcher.clearEntries': async () => {
       state.clearEntries()
       logger.info('已清空日志列表')
+    },
+    'vscode-log-watcher.toggleAutoScroll': async () => {
+      state.toggleAutoScroll()
+      logger.info(`自动滚动已${state.autoScroll.value ? '开启' : '关闭'}`)
     },
     'vscode-log-watcher.formatJsonLine': async (target) => {
       const entry = isLogTreeNode(target) ? target.entry : target

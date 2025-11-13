@@ -112,6 +112,7 @@ export const useLogState = createSingletonComposable(() => {
   const keywordFilter = ref('')
   const highlightKeyword = ref('')
   const isPaused = ref(false)
+  const autoScroll = ref(true) // 自动滚动开关，默认开启
   const pendingLines = ref<string[]>([])
   const contentTransform = ref<CompiledContentTransform>(compileContentTransform(''))
   let lastTransformErrorKey: string | undefined
@@ -253,6 +254,11 @@ export const useLogState = createSingletonComposable(() => {
     })
   })
 
+  const lastFilteredEntryId = computed(() => {
+    const filtered = filteredEntries.value
+    return filtered.length > 0 ? filtered[filtered.length - 1].id : undefined
+  })
+
   const controlMessage = computed(() => {
     const keywordText = keywordFilter.value ? keywordFilter.value : '（无）'
     const highlightText = highlightKeyword.value ? highlightKeyword.value : '（无）'
@@ -267,6 +273,7 @@ export const useLogState = createSingletonComposable(() => {
       ? `（待处理 ${pendingLines.value.length} 行）`
       : ''
     const status = isPaused.value ? `已暂停${pendingText}` : '监听中'
+    const autoScrollText = autoScroll.value ? '开启' : '关闭'
 
     return [
       `状态: ${status}`,
@@ -275,6 +282,7 @@ export const useLogState = createSingletonComposable(() => {
       `关键字过滤: ${keywordText}`,
       `关键字高亮: ${highlightText}`,
       `内容函数: ${transformLabel}`,
+      `自动滚动: ${autoScrollText}`,
     ].join('  |  ')
   })
 
@@ -351,7 +359,9 @@ export const useLogState = createSingletonComposable(() => {
     keywordFilter,
     highlightKeyword,
     isPaused,
+    autoScroll,
     filteredEntries,
+    lastFilteredEntryId,
     treeData,
     controlMessage,
     selectedFileLabel,
@@ -371,6 +381,9 @@ export const useLogState = createSingletonComposable(() => {
         pendingLines.value = []
         appendEntries(buffered)
       }
+    },
+    toggleAutoScroll() {
+      autoScroll.value = !autoScroll.value
     },
     setLevelFilter(value: LogLevelFilter) {
       levelFilter.value = value
