@@ -1,4 +1,3 @@
-import { logger } from '../utils'
 import preset from './preset'
 
 export type ContentTransformFn = (line: string) => unknown
@@ -35,8 +34,7 @@ export function compileContentTransform(input: string): CompiledContentTransform
     const fn = compileAsExpression(trimmed)
     return { source: trimmed, fn }
   }
-  catch (expressionError) {
-    logger.error('compileContentTransform', expressionError)
+  catch {
     try {
       const fn = compileAsBody(trimmed)
       return { source: trimmed, fn }
