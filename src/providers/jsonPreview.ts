@@ -1,4 +1,5 @@
-import type { type Event, EventEmitter, type TextDocumentContentProvider, Uri } from 'vscode'
+import type { Event, TextDocumentContentProvider, Uri } from 'vscode'
+import { EventEmitter } from 'vscode'
 
 const SCHEME = 'vscode-log-watcher-json'
 
