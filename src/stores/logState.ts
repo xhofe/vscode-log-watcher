@@ -332,6 +332,9 @@ export const useLogState = createSingletonComposable(() => {
     }
 
     const highlightKeywords = highlightTokens.value
+    const filterKeywords = keywordTokens.value
+    // 合并高亮关键字和过滤关键字（去重）
+    const allHighlightKeywords = Array.from(new Set([...highlightKeywords, ...filterKeywords]))
 
     for (const entry of filteredEntries.value) {
       const displayText = applyContentTransform(entry.text, contentTransform.value)
@@ -342,8 +345,8 @@ export const useLogState = createSingletonComposable(() => {
       
       // 计算高亮位置：如果有行号，需要偏移高亮位置
       let highlights: [number, number][] = []
-      if (highlightKeywords.length > 0) {
-        const baseHighlights = computeHighlights(displayText, highlightKeywords)
+      if (allHighlightKeywords.length > 0) {
+        const baseHighlights = computeHighlights(displayText, allHighlightKeywords)
         if (entry.lineNumber) {
           // 行号格式: "[数字] "，需要计算偏移量
           const prefixLength = `[${entry.lineNumber}] `.length
