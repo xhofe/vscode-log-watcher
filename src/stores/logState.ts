@@ -117,6 +117,7 @@ export const useLogState = createSingletonComposable(() => {
   const highlightKeyword = ref('')
   const isPaused = ref(false)
   const autoScroll = ref(true) // 自动滚动开关，默认开启
+  const showLineNumber = ref(false) // 是否显示行号，从配置读取
   const pendingLines = ref<Array<{ text: string, lineNumber: number }>>([])
   const contentTransform = ref<CompiledContentTransform>(compileContentTransform(''))
   let lastTransformErrorKey: string | undefined
@@ -152,9 +153,18 @@ export const useLogState = createSingletonComposable(() => {
 
   loadContentTransform()
 
+  function loadShowLineNumber() {
+    const value = workspace.getConfiguration('vscode-log-watcher').get<boolean>('showLineNumber', false)
+    showLineNumber.value = value ?? false
+  }
+
+  loadShowLineNumber()
+
   const configDisposable = workspace.onDidChangeConfiguration((event) => {
     if (event.affectsConfiguration('vscode-log-watcher.contentTransform'))
       loadContentTransform()
+    if (event.affectsConfiguration('vscode-log-watcher.showLineNumber'))
+      loadShowLineNumber()
   })
 
   function resetEntries(lines: Array<{ text: string, lineNumber: number }>) {
@@ -338,16 +348,17 @@ export const useLogState = createSingletonComposable(() => {
 
     for (const entry of filteredEntries.value) {
       const displayText = applyContentTransform(entry.text, contentTransform.value)
-      // 如果有行号，在显示文本前添加行号
-      const labelText = entry.lineNumber
+      // 根据配置决定是否显示行号
+      const shouldShowLineNumber = showLineNumber.value && entry.lineNumber
+      const labelText = shouldShowLineNumber
         ? `[${entry.lineNumber}] ${displayText}`
         : displayText
       
-      // 计算高亮位置：如果有行号，需要偏移高亮位置
+      // 计算高亮位置：如果显示行号，需要偏移高亮位置
       let highlights: [number, number][] = []
       if (allHighlightKeywords.length > 0) {
         const baseHighlights = computeHighlights(displayText, allHighlightKeywords)
-        if (entry.lineNumber) {
+        if (shouldShowLineNumber) {
           // 行号格式: "[数字] "，需要计算偏移量
           const prefixLength = `[${entry.lineNumber}] `.length
           highlights = baseHighlights.map(([start, end]) => [
@@ -370,7 +381,7 @@ export const useLogState = createSingletonComposable(() => {
       item.tooltip = entry.lineNumber
         ? `行号: ${entry.lineNumber}\n${entry.text}`
         : entry.text
-      item.description = entry.lineNumber ? `行 ${entry.lineNumber}` : undefined
+      item.description = shouldShowLineNumber ? `行 ${entry.lineNumber}` : undefined
       data.push({
         kind: 'log',
         entry,
