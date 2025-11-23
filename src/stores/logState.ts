@@ -18,6 +18,7 @@ export interface LogEntry {
   text: string
   level: LogLevel
   timestamp: number
+  lineNumber?: number // 原始文件中的行号
 }
 
 export interface LogTreeNode extends TreeViewNode {
@@ -116,7 +117,7 @@ export const useLogState = createSingletonComposable(() => {
   const highlightKeyword = ref('')
   const isPaused = ref(false)
   const autoScroll = ref(true) // 自动滚动开关，默认开启
-  const pendingLines = ref<string[]>([])
+  const pendingLines = ref<Array<{ text: string, lineNumber: number }>>([])
   const contentTransform = ref<CompiledContentTransform>(compileContentTransform(''))
   let lastTransformErrorKey: string | undefined
   const watcherRef = ref<LogWatcher>()
@@ -156,29 +157,31 @@ export const useLogState = createSingletonComposable(() => {
       loadContentTransform()
   })
 
-  function resetEntries(lines: string[]) {
+  function resetEntries(lines: Array<{ text: string, lineNumber: number }>) {
     entryCounter = 0
     pendingLines.value = []
     entries.value = lines.map((line) => {
       const entry: LogEntry = {
         id: createEntryId(entryCounter++),
-        text: line,
-        level: detectLevel(line),
+        text: line.text,
+        level: detectLevel(line.text),
         timestamp: Date.now(),
+        lineNumber: line.lineNumber,
       }
       return entry
     }).slice(-MAX_ENTRIES)
   }
 
-  function appendEntries(lines: string[]) {
+  function appendEntries(lines: Array<{ text: string, lineNumber: number }>) {
     if (!lines.length)
       return
     const newEntries = lines.map((line) => {
       const entry: LogEntry = {
         id: createEntryId(entryCounter++),
-        text: line,
-        level: detectLevel(line),
+        text: line.text,
+        level: detectLevel(line.text),
         timestamp: Date.now(),
+        lineNumber: line.lineNumber,
       }
       return entry
     })
@@ -332,14 +335,21 @@ export const useLogState = createSingletonComposable(() => {
 
     for (const entry of filteredEntries.value) {
       const displayText = applyContentTransform(entry.text, contentTransform.value)
+      // 如果有行号，在显示文本前添加行号
+      const labelText = entry.lineNumber
+        ? `[${entry.lineNumber}] ${displayText}`
+        : displayText
       const label = {
-        label: displayText,
+        label: labelText,
         highlights: computeHighlights(displayText, highlightKeywords),
       }
       const item = new TreeItem(label, TreeItemCollapsibleState.None)
       item.contextValue = 'logLine'
       item.iconPath = levelIcons[entry.level]
-      item.tooltip = entry.text
+      item.tooltip = entry.lineNumber
+        ? `行号: ${entry.lineNumber}\n${entry.text}`
+        : entry.text
+      item.description = entry.lineNumber ? `行 ${entry.lineNumber}` : undefined
       data.push({
         kind: 'log',
         entry,

@@ -2,7 +2,7 @@ import type { QuickPickItem } from 'vscode'
 import type { LogEntry, LogLevelFilter, LogTreeNode } from './stores/logState'
 import { effect } from '@reactive-vscode/reactivity'
 import { defineExtension, tryOnScopeDispose, useCommands, useTreeView, useVscodeContext } from 'reactive-vscode'
-import { languages, Uri, window, workspace } from 'vscode'
+import { languages, Range, Selection, TextEditorRevealType, Uri, window, workspace, env } from 'vscode'
 import { JSON_PREVIEW_SCHEME, JsonPreviewProvider } from './providers/jsonPreview'
 import { useLogState } from './stores/logState'
 import { logger } from './utils'
@@ -250,6 +250,42 @@ const { activate, deactivate } = defineExtension(() => {
       }
       catch (error) {
         void window.showErrorMessage(`JSON 解析失败: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    },
+    'vscode-log-watcher.copyLogLine': async (target) => {
+      const entry = isLogTreeNode(target) ? target.entry : target
+      if (!entry) {
+        void window.showWarningMessage('未找到可复制的日志行')
+        return
+      }
+      await env.clipboard.writeText(entry.text)
+      logger.info('已复制日志行到剪贴板')
+    },
+    'vscode-log-watcher.goToLogLine': async (target) => {
+      const entry = isLogTreeNode(target) ? target.entry : target
+      if (!entry || !entry.lineNumber) {
+        void window.showWarningMessage('未找到可跳转的日志行或行号不可用')
+        return
+      }
+      const fileUri = state.selectedFile.value
+      if (!fileUri) {
+        void window.showWarningMessage('未选择日志文件')
+        return
+      }
+      try {
+        const doc = await workspace.openTextDocument(fileUri)
+        const editor = await window.showTextDocument(doc)
+        const lineNumber = entry.lineNumber - 1 // VS Code 行号从 0 开始
+        const position = editor.selection.active.with(lineNumber, 0)
+        editor.selection = new Selection(position, position)
+        editor.revealRange(
+          new Range(position, position),
+          TextEditorRevealType.InCenter,
+        )
+        logger.info(`已跳转到第 ${entry.lineNumber} 行`)
+      }
+      catch (error) {
+        void window.showErrorMessage(`无法打开文件: ${error instanceof Error ? error.message : String(error)}`)
       }
     },
   })

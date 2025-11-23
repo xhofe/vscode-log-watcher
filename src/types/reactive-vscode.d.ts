@@ -11,5 +11,7 @@ declare module 'reactive-vscode' {
     'vscode-log-watcher.clearEntries': () => Promise<void>
     'vscode-log-watcher.toggleAutoScroll': () => Promise<void>
     'vscode-log-watcher.formatJsonLine': (target: LogEntry | LogTreeNode) => Promise<void>
+    'vscode-log-watcher.copyLogLine': (target: LogEntry | LogTreeNode) => Promise<void>
+    'vscode-log-watcher.goToLogLine': (target: LogEntry | LogTreeNode) => Promise<void>
   }
 }

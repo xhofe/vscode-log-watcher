@@ -82,6 +82,16 @@
         "command": "vscode-log-watcher.formatJsonLine",
         "title": "JSON 格式化选中行",
         "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.copyLogLine",
+        "title": "复制日志行",
+        "category": "Log Watcher"
+      },
+      {
+        "command": "vscode-log-watcher.goToLogLine",
+        "title": "跳转到日志行",
+        "category": "Log Watcher"
       }
     ],
     "viewsContainers": {
@@ -145,6 +155,16 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "vscode-log-watcher.copyLogLine",
+          "when": "view == vscode-log-watcher.logPanel && viewItem == logLine",
+          "group": "1_actions"
+        },
+        {
+          "command": "vscode-log-watcher.goToLogLine",
+          "when": "view == vscode-log-watcher.logPanel && viewItem == logLine",
+          "group": "1_actions"
+        },
         {
           "command": "vscode-log-watcher.formatJsonLine",
           "when": "view == vscode-log-watcher.logPanel && viewItem == logLine",
