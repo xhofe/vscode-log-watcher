@@ -339,9 +339,27 @@ export const useLogState = createSingletonComposable(() => {
       const labelText = entry.lineNumber
         ? `[${entry.lineNumber}] ${displayText}`
         : displayText
+      
+      // 计算高亮位置：如果有行号，需要偏移高亮位置
+      let highlights: [number, number][] = []
+      if (highlightKeywords.length > 0) {
+        const baseHighlights = computeHighlights(displayText, highlightKeywords)
+        if (entry.lineNumber) {
+          // 行号格式: "[数字] "，需要计算偏移量
+          const prefixLength = `[${entry.lineNumber}] `.length
+          highlights = baseHighlights.map(([start, end]) => [
+            start + prefixLength,
+            end + prefixLength,
+          ])
+        }
+        else {
+          highlights = baseHighlights
+        }
+      }
+      
       const label = {
         label: labelText,
-        highlights: computeHighlights(displayText, highlightKeywords),
+        highlights,
       }
       const item = new TreeItem(label, TreeItemCollapsibleState.None)
       item.contextValue = 'logLine'
