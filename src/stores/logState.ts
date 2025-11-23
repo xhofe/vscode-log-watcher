@@ -353,7 +353,7 @@ export const useLogState = createSingletonComposable(() => {
       const labelText = shouldShowLineNumber
         ? `[${entry.lineNumber}] ${displayText}`
         : displayText
-      
+
       // 计算高亮位置：如果显示行号，需要偏移高亮位置
       let highlights: [number, number][] = []
       if (allHighlightKeywords.length > 0) {
@@ -370,7 +370,7 @@ export const useLogState = createSingletonComposable(() => {
           highlights = baseHighlights
         }
       }
-      
+
       const label = {
         label: labelText,
         highlights,

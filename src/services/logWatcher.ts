@@ -76,10 +76,10 @@ async function readTailLines(handle: FileHandle, count: number): Promise<Array<{
     lines.shift()
 
   const tailLines = lines.slice(-count)
-  
+
   // 计算行号：从总行数减去尾部行数，然后加1（因为行号从1开始）
   const startLineNumber = Math.max(1, totalLines - tailLines.length + 1)
-  
+
   return tailLines.map((line, index) => ({
     text: line,
     lineNumber: startLineNumber + index,
