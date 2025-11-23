@@ -7,10 +7,11 @@
 
 <!-- configs -->
 
-| Key                                   | Description                                                                                                                             | Type     | Default |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
-| `vscode-log-watcher.defaultFile`      | 扩展激活时自动监听的默认日志文件绝对路径。留空则不自动打开。                                                                                                          | `string` | `""`    |
-| `vscode-log-watcher.contentTransform` | 自定义 JavaScript 代码，用于将每一行日志转换成面板展示内容。可写函数表达式（例如 `line =&gt; line.trim()`）或函数体（例如 `return line.trim()`）。当返回 `undefined` 或抛出异常时，将回退为原始日志行。 | `string` | `""`    |
+| Key                                   | Description                                                                                                                             | Type      | Default |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
+| `vscode-log-watcher.defaultFile`      | 扩展激活时自动监听的默认日志文件绝对路径。留空则不自动打开。                                                                                                          | `string`  | `""`    |
+| `vscode-log-watcher.contentTransform` | 自定义 JavaScript 代码，用于将每一行日志转换成面板展示内容。可写函数表达式（例如 `line =&gt; line.trim()`）或函数体（例如 `return line.trim()`）。当返回 `undefined` 或抛出异常时，将回退为原始日志行。 | `string`  | `""`    |
+| `vscode-log-watcher.showLineNumber`   | 是否在日志面板中显示原始文件行号。                                                                                                                       | `boolean` | `false` |
 
 <!-- configs -->
 
@@ -20,15 +21,17 @@
 
 | Command                                  | Title                    |
 | ---------------------------------------- | ------------------------ |
-| `vscode-log-watcher.selectLogFile`       | 选择/切换文件     |
-| `vscode-log-watcher.setLogLevelFilter`   | 日志等级过滤      |
-| `vscode-log-watcher.setKeywordFilter`    | 关键字过滤       |
-| `vscode-log-watcher.setHighlightKeyword` | 关键字高亮       |
-| `vscode-log-watcher.pause`               | 暂停监听        |
-| `vscode-log-watcher.resume`              | 恢复监听        |
-| `vscode-log-watcher.clearEntries`        | 清空日志        |
-| `vscode-log-watcher.toggleAutoScroll`    | 自动滚动        |
-| `vscode-log-watcher.formatJsonLine`      | JSON 格式化选中行 |
+| `vscode-log-watcher.selectLogFile`       | Log Watcher: 选择/切换文件     |
+| `vscode-log-watcher.setLogLevelFilter`   | Log Watcher: 日志等级过滤      |
+| `vscode-log-watcher.setKeywordFilter`    | Log Watcher: 关键字过滤       |
+| `vscode-log-watcher.setHighlightKeyword` | Log Watcher: 关键字高亮       |
+| `vscode-log-watcher.pause`               | Log Watcher: 暂停监听        |
+| `vscode-log-watcher.resume`              | Log Watcher: 恢复监听        |
+| `vscode-log-watcher.clearEntries`        | Log Watcher: 清空日志        |
+| `vscode-log-watcher.toggleAutoScroll`    | Log Watcher: 自动滚动        |
+| `vscode-log-watcher.formatJsonLine`      | Log Watcher: JSON 格式化选中行 |
+| `vscode-log-watcher.copyLogLine`         | Log Watcher: 复制日志行       |
+| `vscode-log-watcher.goToLogLine`         | Log Watcher: 跳转到日志行      |
 
 <!-- commands -->
 
